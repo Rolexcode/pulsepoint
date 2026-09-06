@@ -1,32 +1,58 @@
 # PulsePrint
 
-PulsePrint is a deliberately small Hack2Heal proof of concept. It uses a phone's rear camera and flash to sample fingertip photoplethysmography (PPG) in the browser, estimate pulse rate from a usable signal, and compare recent readings with a local personal baseline.
+PulsePrint is a browser-based photoplethysmography (PPG) prototype that uses a phone's rear camera and flash to capture fingertip pulse signals, estimate BPM from usable recordings, and build a simple personal baseline from recent measurements.
 
-The entire measurement pipeline runs in the browser. No frames, waveform samples, or readings are uploaded.
+**Live demo:** https://pulsepoint-gold-pi.vercel.app/
 
-## What the prototype does
+> Prototype only — not a medical device, diagnosis, or substitute for professional care.
 
-- Requests the rear camera with `getUserMedia`
-- Attempts torch control when the browser exposes the constraint
-- Samples mean red-channel intensity from a central camera region
-- Detrends and smooths the raw optical signal
-- Estimates BPM using autocorrelation with a peak-interval cross-check
-- Rejects short, dark, saturated, flat, or weakly periodic signals
-- Stores up to five valid readings in versioned `localStorage`
-- Builds a simple personal range after repeated valid readings
+## How it works
+
+1. The user covers the rear camera and flash with a fingertip.
+2. PulsePrint samples light-intensity changes from the camera feed in the browser.
+3. The signal is detrended and smoothed.
+4. BPM is estimated using autocorrelation with a peak-interval cross-check.
+5. A quality gate rejects recordings that are too short, dark, saturated, flat, or insufficiently periodic.
+6. Valid readings are stored locally and used to form a simple personal baseline.
+
+No video, waveform samples, or readings are uploaded. Processing happens locally in the browser.
+
+## Features
+
+- Rear-camera capture with `getUserMedia`
+- Torch support where the browser/device exposes it
+- Live PPG waveform
+- Signal-quality checks and safe rejection of unreliable readings
+- BPM estimation from valid signals
+- Recent reading history stored in `localStorage`
+- Simple personal baseline after repeated valid readings
+- Responsive mobile-first interface
+- No backend, account, database, or external API required
+
+## Tech stack
+
+- Next.js
+- TypeScript
+- React
+- Canvas API
+- MediaDevices / `getUserMedia`
+- Browser-side signal processing
+- Vercel
 
 ## Run locally
 
-Requirements: Node.js 20.9 or newer and npm.
+Requires Node.js 20.9+ and npm.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. Camera access is allowed on `localhost`, but testing from another phone on your local network normally requires HTTPS.
+Then open `http://localhost:3000`.
 
-## Verify
+Camera access works on `localhost`; testing from another device generally requires HTTPS.
+
+## Verification
 
 ```bash
 npm run lint
@@ -34,34 +60,27 @@ npm test
 npm run build
 ```
 
-## Deploy to Vercel
+The signal tests include synthetic pulse rates across the supported range and a flat-signal case that must be rejected rather than assigned a BPM.
 
-The quickest phone-test path is a Vercel HTTPS preview:
+## Phone measurement tips
 
-```bash
-npx vercel
-```
+For the cleanest signal:
 
-After checking the preview on the phone, publish the production deployment:
+- Use the HTTPS deployment in a recent mobile browser.
+- Cover the rear camera and flash fully but gently.
+- Keep your hand and phone completely still during the measurement.
+- Avoid pressing hard enough to restrict blood flow or saturate the camera.
+- Warm cold hands before measuring.
+- Retry if PulsePrint rejects the recording.
 
-```bash
-npx vercel --prod
-```
+Torch control is not standardized across every phone/browser combination, so the app falls back gracefully when it is unavailable.
 
-No environment variables or external services are required.
+## Current limitations
 
-## Phone measurement
+Smartphone PPG quality varies with motion, finger pressure, ambient light, skin pigmentation, temperature, camera hardware, automatic exposure/white-balance processing, and sensor saturation. PulsePrint intentionally rejects uncertain recordings instead of forcing a BPM result.
 
-1. Open the HTTPS deployment in a recent mobile Chrome browser.
-2. Tap **Start measurement** and allow camera access.
-3. Gently cover the rear camera and flash with a fingertip.
-4. Keep the phone and hand still for 24 seconds.
-5. If a reading is rejected, adjust coverage or pressure and repeat.
+The current baseline is only a comparison with recent valid readings stored in the same browser. It is not a clinical reference range.
 
-Torch control is not standardized across every phone/browser combination. PulsePrint continues with a clear fallback when the torch constraint is unavailable.
+## Hack2Heal 2.0
 
-## Scientific and safety limits
-
-This is a hackathon prototype, not a medical device or diagnosis. Smartphone cameras differ, and PPG is sensitive to motion, pressure, ambient light, temperature, skin pigmentation, device processing, and sensor saturation. The quality gate is intentionally conservative, but it has not been clinically validated. A baseline describes only the recent readings saved in this browser and must not be interpreted as a clinical reference range.
-
-Stop the measurement if the phone or flash feels uncomfortably warm.
+PulsePrint was developed as a working proof of concept for Hack2Heal 2.0, exploring whether repeated smartphone-camera PPG can support within-person deviation monitoring while abstaining when signal quality is insufficient.
