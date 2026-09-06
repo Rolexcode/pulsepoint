@@ -3,7 +3,7 @@ import type { PpgSample, SignalAnalysis } from "./types";
 const MIN_BPM = 45;
 const MAX_BPM = 180;
 const STARTUP_TRIM_SECONDS = 3;
-const MIN_QUALITY_SCORE = 45;
+const MIN_QUALITY_SCORE = 35;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -104,8 +104,6 @@ function autocorrelation(
     }
   }
 
-  // Repeating waveforms also correlate at 2× and 3× the true beat period.
-  // Prefer the earliest strong local maximum to avoid reporting half-rate BPM.
   const strongPeakThreshold = bestScore * 0.86;
   for (let lag = minLag + 1; lag < maxLag; lag += 1) {
     const score = scores.get(lag) ?? -1;
@@ -190,9 +188,6 @@ export function analyzePpg(samples: PpgSample[]): SignalAnalysis {
     return rejected(fallback, "Not enough camera data was captured. Keep your finger still and try again.");
   }
 
-  // Mobile cameras often spend the first few seconds settling exposure, focus,
-  // white balance and torch brightness. Those large startup transients can swamp
-  // the much smaller pulsatile signal, so analyze only the stabilized window.
   const firstTime = samples[0].time;
   const stabilizedSamples = samples.filter(
     (sample) => sample.time - firstTime >= STARTUP_TRIM_SECONDS,
@@ -254,7 +249,7 @@ export function analyzePpg(samples: PpgSample[]): SignalAnalysis {
   );
   const withPeriodicity = { ...partial, periodicity: auto.score };
 
-  if (auto.score < 0.2 || bpm < MIN_BPM || bpm > MAX_BPM || qualityScore < MIN_QUALITY_SCORE) {
+  if (auto.score < 0.15 || bpm < MIN_BPM || bpm > MAX_BPM || qualityScore < MIN_QUALITY_SCORE) {
     return rejected(
       withPeriodicity,
       `The signal was too noisy to estimate a pulse reliably (quality ${qualityScore}/100). Keep still, use light fingertip pressure, and retry.`,
