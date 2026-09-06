@@ -2,6 +2,8 @@ import type { PpgSample, SignalAnalysis } from "./types";
 
 const MIN_BPM = 45;
 const MAX_BPM = 180;
+const STARTUP_TRIM_SECONDS = 3;
+const MIN_QUALITY_SCORE = 45;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -188,13 +190,22 @@ export function analyzePpg(samples: PpgSample[]): SignalAnalysis {
     return rejected(fallback, "Not enough camera data was captured. Keep your finger still and try again.");
   }
 
-  const duration = samples.at(-1)!.time - samples[0].time;
-  const sampleRate = clamp((samples.length - 1) / Math.max(duration, 0.001), 1, 60);
-  const redValues = samples.map((sample) => sample.red);
+  // Mobile cameras often spend the first few seconds settling exposure, focus,
+  // white balance and torch brightness. Those large startup transients can swamp
+  // the much smaller pulsatile signal, so analyze only the stabilized window.
+  const firstTime = samples[0].time;
+  const stabilizedSamples = samples.filter(
+    (sample) => sample.time - firstTime >= STARTUP_TRIM_SECONDS,
+  );
+  const analysisSamples = stabilizedSamples.length >= 100 ? stabilizedSamples : samples;
+
+  const duration = analysisSamples.at(-1)!.time - analysisSamples[0].time;
+  const sampleRate = clamp((analysisSamples.length - 1) / Math.max(duration, 0.001), 1, 60);
+  const redValues = analysisSamples.map((sample) => sample.red);
   const meanRed = mean(redValues);
   const saturationRatio =
     redValues.filter((value) => value >= 252).length / redValues.length;
-  const rawValues = resample(samples, sampleRate);
+  const rawValues = resample(analysisSamples, sampleRate);
   const slowTrend = movingAverage(rawValues, Math.max(3, Math.round(sampleRate * 0.8)));
   const detrended = rawValues.map((value, index) => value - slowTrend[index]);
   const filtered = movingAverage(detrended, Math.max(2, Math.round(sampleRate * 0.1)));
@@ -243,10 +254,10 @@ export function analyzePpg(samples: PpgSample[]): SignalAnalysis {
   );
   const withPeriodicity = { ...partial, periodicity: auto.score };
 
-  if (auto.score < 0.2 || bpm < MIN_BPM || bpm > MAX_BPM || qualityScore < 50) {
+  if (auto.score < 0.2 || bpm < MIN_BPM || bpm > MAX_BPM || qualityScore < MIN_QUALITY_SCORE) {
     return rejected(
       withPeriodicity,
-      "The signal was too noisy to estimate a pulse reliably. Keep still and retry.",
+      `The signal was too noisy to estimate a pulse reliably (quality ${qualityScore}/100). Keep still, use light fingertip pressure, and retry.`,
       qualityScore,
     );
   }
