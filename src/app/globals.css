@@ -1,0 +1,268 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f7f5;
+  --foreground: #14221c;
+  --surface: #ffffff;
+  --subtle: #edf3f0;
+  --border: #d5e0da;
+  --muted-foreground: #52645b;
+  --primary: #176b4d;
+  --primary-foreground: #f5fff9;
+  --primary-muted: #d4eee1;
+  --primary-soft: #dff2e8;
+  --signal: #f06272;
+  --warning: #9a6400;
+  --warning-soft: #fff7df;
+  --warning-border: #e8d5a0;
+  --danger: #a03535;
+  --danger-soft: #fff0ef;
+  --danger-border: #efc2bd;
+  --success: #165f45;
+  --success-soft: #e5f5ec;
+  --success-border: #b7ddc8;
+  --camera: #0a1410;
+  --camera-panel: #14251d;
+  --camera-border: #365649;
+  --camera-overlay: rgb(6 15 11 / 72%);
+  --camera-foreground: #edf8f2;
+  --camera-muted: #a7bbb1;
+  --progress-track: #d5e0da;
+  --ring: #176b4d;
+  --wave: #22a36f;
+  --wave-grid: rgb(64 110 89 / 18%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-soft: var(--primary-soft);
+  --color-signal: var(--signal);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-border: var(--warning-border);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-border: var(--danger-border);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-border: var(--success-border);
+  --color-camera: var(--camera);
+  --color-camera-panel: var(--camera-panel);
+  --color-camera-border: var(--camera-border);
+  --color-camera-overlay: var(--camera-overlay);
+  --color-camera-foreground: var(--camera-foreground);
+  --color-camera-muted: var(--camera-muted);
+  --color-progress-track: var(--progress-track);
+  --color-ring: var(--ring);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #09110e;
+    --foreground: #edf5f1;
+    --surface: #101b16;
+    --subtle: #16251e;
+    --border: #2b4036;
+    --muted-foreground: #a8bbb1;
+    --primary: #6dd3a5;
+    --primary-foreground: #082117;
+    --primary-muted: #174634;
+    --primary-soft: #173c2d;
+    --signal: #ff8090;
+    --warning: #f4c76d;
+    --warning-soft: #352912;
+    --warning-border: #66522b;
+    --danger: #ff9d96;
+    --danger-soft: #351c1a;
+    --danger-border: #683a36;
+    --success: #8be0b9;
+    --success-soft: #17382a;
+    --success-border: #2f644c;
+    --progress-track: #2b4036;
+    --ring: #6dd3a5;
+    --wave: #6dd3a5;
+    --wave-grid: rgb(109 211 165 / 18%);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 28rem),
+    var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.focus-ring,
+.button-primary,
+.button-secondary,
+.button-quiet,
+.button-danger {
+  outline: none;
+}
+
+.focus-ring:focus-visible,
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.button-quiet:focus-visible,
+.button-danger:focus-visible {
+  box-shadow: 0 0 0 3px var(--background), 0 0 0 5px var(--ring);
+}
+
+.button-primary,
+.button-secondary,
+.button-quiet,
+.button-danger {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.button-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 88%, black);
+}
+
+.button-secondary,
+.button-quiet {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.button-secondary:hover:not(:disabled),
+.button-quiet:hover:not(:disabled) {
+  background: var(--subtle);
+}
+
+.button-danger {
+  background: var(--danger);
+  color: var(--surface);
+}
+
+.camera-stage::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 55%, rgb(0 0 0 / 30%));
+  content: "";
+}
+
+.finger-guide {
+  border: 1px solid var(--camera-border);
+  background: rgb(4 12 8 / 42%);
+  box-shadow: 0 0 0 999px rgb(2 8 5 / 34%), inset 0 0 0 8px rgb(255 255 255 / 5%);
+}
+
+.waveform {
+  --wave: var(--primary);
+  --wave-grid: color-mix(in srgb, var(--primary) 18%, transparent);
+  display: block;
+}
+
+.state-error,
+.state-warning,
+.state-success {
+  display: flex;
+  gap: 0.75rem;
+  border: 1px solid;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.state-error {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.state-warning {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.state-success {
+  border-color: var(--success-border);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--subtle), color-mix(in srgb, var(--subtle) 55%, var(--surface)), var(--subtle));
+  background-size: 220% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .status-pulse {
+    animation: status-pulse 1.8s ease-in-out infinite;
+  }
+
+  .skeleton {
+    animation: skeleton-shimmer 1.6s linear infinite;
+  }
+
+  .button-primary:active:not(:disabled),
+  .button-secondary:active:not(:disabled),
+  .button-quiet:active:not(:disabled),
+  .button-danger:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.82); }
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -120% 0; }
+}
